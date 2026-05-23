@@ -35,6 +35,14 @@ app.get('/tools', async () => ({
     { name: 'web.search', description: 'Search the web via Brave Search API' },
     { name: 'web.fetch', description: 'Fetch and read a URL with clean content extraction' },
     { name: 'web.extract', description: 'Extract specific data from a URL using CSS selectors' },
+    { name: 'browser.navigate', description: 'Navigate to a URL in persistent browser session' },
+    { name: 'browser.click', description: 'Click element by CSS selector or text' },
+    { name: 'browser.fill', description: 'Fill input field with human-like typing' },
+    { name: 'browser.scroll', description: 'Scroll page up or down' },
+    { name: 'browser.screenshot', description: 'Capture current page screenshot' },
+    { name: 'browser.dom', description: 'Get accessibility tree of current page' },
+    { name: 'browser.extract-visible', description: 'Extract visible interactive elements' },
+    { name: 'browser.go-back', description: 'Navigate back in browser history' },
   ],
 }));
 
