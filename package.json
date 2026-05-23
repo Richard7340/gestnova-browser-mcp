@@ -1,0 +1,27 @@
+{
+  "name": "gestnova-browser-mcp",
+  "version": "1.0.0",
+  "description": "Browser MCP server — web search, content reading, and browser automation for Gestnova",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "@mozilla/readability": "^0.5.0",
+    "jsdom": "^25.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "vitest": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/jsdom": "^21.1.0"
+  }
+}
