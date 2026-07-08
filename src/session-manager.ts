@@ -90,6 +90,10 @@ export class BrowserSessionManager extends EventEmitter {
 
     const context = await chromium.launchPersistentContext(profilePath, {
       headless: true,
+      // Alpine/musl: Playwright's bundled (glibc) chromium won't launch here.
+      // Point at the OS-native chromium installed via apk (CHROMIUM_PATH).
+      // Falls back to Playwright's bundled browser when the env is unset.
+      executablePath: process.env.CHROMIUM_PATH || undefined,
       viewport: this.randomViewport(),
       userAgent: this.chromeUserAgent(),
       locale: 'es-ES',
