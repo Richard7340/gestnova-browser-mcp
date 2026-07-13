@@ -1,7 +1,8 @@
-import { chromium as pwChromium, type BrowserContext, type Page } from 'playwright';
+import { chromium as pwChromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { EventEmitter } from 'node:events';
+import { resolveBrowserMode, acquireCdpContext, connectCdp } from './cdp-mode.js';
 
 // ---------------------------------------------------------------------------
 // Stealth bootstrap — try playwright-extra + stealth plugin; fall back to
@@ -29,6 +30,8 @@ async function loadStealth(): Promise<typeof pwChromium> {
 // ---------------------------------------------------------------------------
 interface Session {
   context: BrowserContext;
+  browser?: Browser;   // presente solo en modo CDP (para disconnect)
+  isCdp?: boolean;
   workspaceId: string;
   profilePath: string;
   createdAt: number;
@@ -77,6 +80,20 @@ export class BrowserSessionManager extends EventEmitter {
       existing.lastActivityAt = Date.now();
       this.resetIdleTimer(workspaceId);
       return existing.context;
+    }
+
+    if (resolveBrowserMode(process.env) === 'cdp') {
+      const browser = await connectCdp(process.env.CDP_URL as string);
+      const context = await acquireCdpContext(browser);
+      const session: Session = {
+        context, browser, isCdp: true,
+        workspaceId, profilePath: '(cdp)',
+        createdAt: Date.now(), lastActivityAt: Date.now(),
+      };
+      this.sessions.set(workspaceId, session);
+      this.resetIdleTimer(workspaceId);
+      this.emit('session:created', { workspaceId, mode: 'cdp' });
+      return context;
     }
 
     if (this.sessions.size >= this.maxConcurrent) {
@@ -148,7 +165,11 @@ export class BrowserSessionManager extends EventEmitter {
     this.timers.delete(workspaceId);
 
     try {
-      await session.context.close();
+      if (session.isCdp) {
+        await session.browser?.close();   // disconnect: cierra la conexión CDP, NO mata el Chrome del usuario
+      } else {
+        await session.context.close();
+      }
     } catch {
       // context may already be closed
     }
