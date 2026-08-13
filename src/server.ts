@@ -37,6 +37,8 @@ app.get('/tools', async () => ({
     { name: 'web.extract', description: 'Extract specific data from a URL using CSS selectors' },
     { name: 'browser.navigate', description: 'Navigate to a URL in persistent browser session' },
     { name: 'browser.click', description: 'Click element by CSS selector or text' },
+    { name: 'browser.click-at', description: 'Click by viewport coordinates (user takeover)' },
+    { name: 'browser.type-text', description: 'Type text into the focused element (user takeover)' },
     { name: 'browser.fill', description: 'Fill input field with human-like typing' },
     { name: 'browser.scroll', description: 'Scroll page up or down' },
     { name: 'browser.screenshot', description: 'Capture current page screenshot' },

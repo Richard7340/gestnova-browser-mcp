@@ -235,14 +235,30 @@ export class BrowserSessionManager extends EventEmitter {
     if (oldest) await this.close(oldest.workspaceId);
   }
 
+  // Viewport FIJO 1280×800 (configurable vía BROWSER_VIEWPORT="WxH").
+  //
+  // Trade-off (takeover): antes randomViewport() elegía uno de varios tamaños para
+  // anti-fingerprinting. Pero el takeover de la plataforma (browser.html, VW/VH)
+  // traduce el clic del usuario asumiendo un viewport FIJO 1280×800; con viewport
+  // aleatorio el clic caía desplazado. Fijamos 1280×800 para que las coordenadas del
+  // takeover sean precisas, a costa de perder algo de variabilidad anti-fingerprint.
+  //
+  //   private randomViewport(): { width: number; height: number } {
+  //     const viewports = [
+  //       { width: 1280, height: 720 },
+  //       { width: 1366, height: 768 },
+  //       { width: 1440, height: 900 },
+  //       { width: 1920, height: 1080 },
+  //     ];
+  //     return viewports[Math.floor(Math.random() * viewports.length)];
+  //   }
   private randomViewport(): { width: number; height: number } {
-    const viewports = [
-      { width: 1280, height: 720 },
-      { width: 1366, height: 768 },
-      { width: 1440, height: 900 },
-      { width: 1920, height: 1080 },
-    ];
-    return viewports[Math.floor(Math.random() * viewports.length)];
+    const raw = process.env.BROWSER_VIEWPORT;
+    if (raw) {
+      const m = /^(\d+)x(\d+)$/i.exec(raw.trim());
+      if (m) return { width: parseInt(m[1], 10), height: parseInt(m[2], 10) };
+    }
+    return { width: 1280, height: 800 };
   }
 
   private chromeUserAgent(): string {
