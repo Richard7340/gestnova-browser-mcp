@@ -50,6 +50,8 @@ app.get('/tools', async () => ({
     { name: 'browser.select', description: 'Choose an option in a dropdown, by value or by visible label' },
     { name: 'browser.clear-cookies', description: 'Clear the workspace browser cookies (signs out of sites)' },
     { name: 'browser.evaluate', description: 'Run JavaScript in the current page (powerful: requires confirmation)' },
+    { name: 'browser.snapshot', description: 'Full page state in one call: screenshot + accessibility tree + interactive elements with coordinates' },
+    { name: 'browser.download', description: 'Download a file (by url or by clicking a selector) into the workspace data room' },
   ],
 }));
 
