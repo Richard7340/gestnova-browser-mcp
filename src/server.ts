@@ -45,6 +45,8 @@ app.get('/tools', async () => ({
     { name: 'browser.dom', description: 'Get accessibility tree of current page' },
     { name: 'browser.extract-visible', description: 'Extract visible interactive elements' },
     { name: 'browser.go-back', description: 'Navigate back in browser history' },
+    { name: 'browser.forward', description: 'Navigate forward in browser history' },
+    { name: 'browser.wait-for', description: 'Wait for a selector, a visible text, or the page to settle' },
   ],
 }));
 
