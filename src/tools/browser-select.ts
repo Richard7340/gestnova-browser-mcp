@@ -37,7 +37,10 @@ export default async function browserSelect(args: unknown) {
     title: await page.title(),
     selected: seleccionadas,
     ok: seleccionadas.length > 0,
-    note,
+    // `error` (y no `note`) a proposito: la plataforma degrada a fallo lo que
+    // trae un error dentro, asi un select que no selecciono nada deja de
+    // salir como "done".
+    error: seleccionadas.length > 0 ? undefined : (note ?? 'No se selecciono ninguna opcion'),
     screenshot: screenshot.toString('base64'),
   };
 }

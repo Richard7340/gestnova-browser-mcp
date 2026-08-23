@@ -38,6 +38,8 @@ describe('browser-select', () => {
     vi.spyOn(sessionMgr, 'touch').mockImplementation(() => {});
     const r: any = await browserSelect({ workspaceId: 'ws', selector: '#pais', value: 'zz' });
     expect(r.ok).toBe(false);
-    expect(String(r.note)).toMatch(/not found/i);
+    // `error` y no `note`: asi la plataforma lo degrada a fallo en vez de
+    // devolver "done" con una seleccion que no ocurrio.
+    expect(String(r.error)).toMatch(/not found/i);
   });
 });
