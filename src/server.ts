@@ -47,6 +47,9 @@ app.get('/tools', async () => ({
     { name: 'browser.go-back', description: 'Navigate back in browser history' },
     { name: 'browser.forward', description: 'Navigate forward in browser history' },
     { name: 'browser.wait-for', description: 'Wait for a selector, a visible text, or the page to settle' },
+    { name: 'browser.select', description: 'Choose an option in a dropdown, by value or by visible label' },
+    { name: 'browser.clear-cookies', description: 'Clear the workspace browser cookies (signs out of sites)' },
+    { name: 'browser.evaluate', description: 'Run JavaScript in the current page (powerful: requires confirmation)' },
   ],
 }));
 
