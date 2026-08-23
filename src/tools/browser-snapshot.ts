@@ -50,8 +50,10 @@ export default async function browserSnapshot(args: unknown) {
     return r;
   }).catch(() => ({ buttons: [], inputs: [], links: [] }));
 
-  // El arbol de accesibilidad es lo mas caro: si falla, la foto sigue valiendo.
-  const accessibilityTree = await page.accessibility.snapshot().catch(() => null);
+  // Mismo arbol que usa browser.dom (ariaSnapshot en modo ai), para que las
+  // dos herramientas cuenten lo mismo. Es lo mas caro y lo mas fragil: si
+  // falla, la foto sigue valiendo.
+  const accessibilityTree = await page.ariaSnapshot({ mode: 'ai' }).catch(() => null);
 
   let text: string | undefined;
   if (includeText) {

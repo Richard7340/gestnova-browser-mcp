@@ -6,7 +6,7 @@ afterEach(() => vi.restoreAllMocks());
 
 const pagina = (over: any = {}) => ({
   evaluate: vi.fn(async () => ({ buttons: [{ tag: 'button', text: 'Enviar', x: 10, y: 20 }], inputs: [], links: [] })),
-  accessibility: { snapshot: vi.fn(async () => ({ role: 'WebArea', name: 'T' })) },
+  ariaSnapshot: vi.fn(async () => '- WebArea "T"'),
   screenshot: vi.fn(async () => Buffer.from('img')),
   viewportSize: () => ({ width: 1280, height: 720 }),
   url: () => 'https://x.com', title: async () => 'T',
@@ -26,7 +26,7 @@ describe('browser-snapshot', () => {
     const p = pagina(); montar(p);
     const r: any = await browserSnapshot({ workspaceId: 'ws' });
     expect(r.screenshot).toBeTruthy();
-    expect(r.accessibilityTree).toEqual({ role: 'WebArea', name: 'T' });
+    expect(r.accessibilityTree).toBe('- WebArea "T"');
     expect(r.buttons[0].text).toBe('Enviar');
     expect(r.viewport).toEqual({ width: 1280, height: 720 });
   });
@@ -39,7 +39,7 @@ describe('browser-snapshot', () => {
 
   // El arbol es lo mas caro y lo mas fragil: que falle no debe tirar la foto.
   it('si el árbol de accesibilidad falla, la foto sigue sirviendo', async () => {
-    const p = pagina({ accessibility: { snapshot: vi.fn(async () => { throw new Error('detached'); }) } });
+    const p = pagina({ ariaSnapshot: vi.fn(async () => { throw new Error('detached'); }) });
     montar(p);
     const r: any = await browserSnapshot({ workspaceId: 'ws' });
     expect(r.accessibilityTree).toBeNull();
