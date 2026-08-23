@@ -5,6 +5,10 @@ import { sessionMgr } from './_session.js';
 
 const schema = z.object({
   workspaceId: z.string(),
+  // La carpeta del data room va por SLUG de empresa. El workspaceId del
+  // navegador es `companyId__userAccountId` (aisla el perfil por usuario), asi
+  // que sin esto el fichero acababa en una carpeta que el data room no conoce.
+  companySlug: z.string().min(1),
   url: z.string().url().optional(),
   selector: z.string().optional(),
   saveAs: z.string().optional(),
@@ -25,10 +29,10 @@ const TOPE_BYTES = 50 * 1024 * 1024; // 50 MB
  * La ruta se valida contra la carpeta de la empresa igual que el resto del
  * data room: un `saveAs` con `..` no puede escribir fuera.
  */
-function rutaSegura(workspaceId: string, rel: string): string | null {
+function rutaSegura(companySlug: string, rel: string): string | null {
   if (!rel || rel.startsWith('/') || rel.split('/').includes('..')) return null;
   const vdrRoot = process.env.VDR_ROOT_PATH ?? '/data/vdr';
-  const base = resolve(join(vdrRoot, 'companies', workspaceId));
+  const base = resolve(join(vdrRoot, 'companies', companySlug));
   const abs = resolve(join(base, rel.replace(/^\/+/, '')));
   return (abs === base || abs.startsWith(base + sep)) ? abs : null;
 }
@@ -43,7 +47,7 @@ function nombreDesdeUrl(u: string): string {
 }
 
 export default async function browserDownload(args: unknown) {
-  const { workspaceId, url, selector, saveAs, timeoutMs } = schema.parse(args);
+  const { workspaceId, companySlug, url, selector, saveAs, timeoutMs } = schema.parse(args);
   if (!url && !selector) throw new Error('Hace falta url o selector para saber que descargar');
   const limite = Math.min(timeoutMs ?? 30_000, TOPE_MS);
   const page = await sessionMgr.getActivePage(workspaceId);
@@ -82,7 +86,7 @@ export default async function browserDownload(args: unknown) {
   }
 
   const rel = saveAs && saveAs.includes('/') ? saveAs : `descargas/${nombre}`;
-  const abs = rutaSegura(workspaceId, rel);
+  const abs = rutaSegura(companySlug, rel);
   if (!abs) return { ok: false, error: 'path-traversal-blocked' };
 
   await mkdir(dirname(abs), { recursive: true });

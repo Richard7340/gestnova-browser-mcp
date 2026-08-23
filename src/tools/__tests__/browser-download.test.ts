@@ -27,15 +27,20 @@ const montar = (p: any) => {
 };
 
 describe('browser-download', () => {
+  it('exige el slug de la empresa: sin el, el fichero acaba donde el data room no mira', async () => {
+    montar(paginaCon(Buffer.from('x')));
+    await expect(browserDownload({ workspaceId: 'ws', url: 'https://x.com/a.pdf' })).rejects.toThrow();
+  });
+
   it('exige saber QUÉ descargar', async () => {
     montar(paginaCon(Buffer.from('x')));
-    await expect(browserDownload({ workspaceId: 'ws' })).rejects.toThrow(/url o selector/i);
+    await expect(browserDownload({ workspaceId: 'ws', companySlug: 'acme' })).rejects.toThrow(/url o selector/i);
   });
 
   it('guarda en el data room y devuelve la ruta, no el contenido', async () => {
     const pdf = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]); // %PDF-
     montar(paginaCon(pdf));
-    const r: any = await browserDownload({ workspaceId: 'acme', url: 'https://x.com/informe.pdf' });
+    const r: any = await browserDownload({ workspaceId: 'ws', companySlug: 'acme', url: 'https://x.com/informe.pdf' });
     expect(r.ok).toBe(true);
     expect(r.relPath).toBe('descargas/informe.pdf');
     expect(r.bytes).toBe(5);
@@ -48,7 +53,7 @@ describe('browser-download', () => {
 
   it('un error del servidor se cuenta, no se guarda un fichero vacío', async () => {
     montar(paginaCon(Buffer.from(''), false, 403));
-    const r: any = await browserDownload({ workspaceId: 'acme', url: 'https://x.com/privado.pdf' });
+    const r: any = await browserDownload({ workspaceId: 'ws', companySlug: 'acme', url: 'https://x.com/privado.pdf' });
     expect(r.ok).toBe(false);
     expect(String(r.error)).toContain('403');
     expect(existsSync(join(raiz, 'companies', 'acme', 'descargas', 'privado.pdf'))).toBe(false);
@@ -56,21 +61,21 @@ describe('browser-download', () => {
 
   it('no deja escribir fuera de la carpeta de la empresa', async () => {
     montar(paginaCon(Buffer.from('x')));
-    const r: any = await browserDownload({ workspaceId: 'acme', url: 'https://x.com/a.pdf', saveAs: '../fuera/a.pdf' });
+    const r: any = await browserDownload({ workspaceId: 'ws', companySlug: 'acme', url: 'https://x.com/a.pdf', saveAs: '../fuera/a.pdf' });
     expect(r.ok).toBe(false);
     expect(String(r.error)).toMatch(/traversal/);
   });
 
   it('respeta un nombre propio', async () => {
     montar(paginaCon(Buffer.from('x')));
-    const r: any = await browserDownload({ workspaceId: 'acme', url: 'https://x.com/a.pdf', saveAs: 'facturas/2026/enero.pdf' });
+    const r: any = await browserDownload({ workspaceId: 'ws', companySlug: 'acme', url: 'https://x.com/a.pdf', saveAs: 'facturas/2026/enero.pdf' });
     expect(r.relPath).toBe('facturas/2026/enero.pdf');
     expect(existsSync(join(raiz, 'companies', 'acme', 'facturas', '2026', 'enero.pdf'))).toBe(true);
   });
 
   it('limpia nombres raros que vienen de la url', async () => {
     montar(paginaCon(Buffer.from('x')));
-    const r: any = await browserDownload({ workspaceId: 'acme', url: 'https://x.com/a%20b;rm.pdf' });
+    const r: any = await browserDownload({ workspaceId: 'ws', companySlug: 'acme', url: 'https://x.com/a%20b;rm.pdf' });
     expect(r.relPath).toMatch(/^descargas\/[\w.\-]+$/);
   });
 });
